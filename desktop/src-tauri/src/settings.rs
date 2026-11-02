@@ -13,6 +13,16 @@ pub struct Settings {
     pub locked: bool,
     /// Set once autostart has been enabled on first run, so turning it off sticks.
     pub autostart_initialized: bool,
+    /// Schedule server address; empty means [`DEFAULT_SERVER_URL`].
+    pub server_url: String,
+}
+
+pub const DEFAULT_SERVER_URL: &str = "http://127.0.0.1:8090";
+
+impl Settings {
+    pub fn server_url(&self) -> &str {
+        if self.server_url.trim().is_empty() { DEFAULT_SERVER_URL } else { self.server_url.trim() }
+    }
 }
 
 fn path(app: &AppHandle) -> Option<PathBuf> {

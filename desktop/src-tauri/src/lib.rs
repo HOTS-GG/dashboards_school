@@ -1,3 +1,4 @@
+mod auth;
 mod desktop_pin;
 mod settings;
 
@@ -130,6 +131,11 @@ fn watch_desktop(app: AppHandle) {
     });
 }
 
+#[tauri::command]
+fn server_url(settings: tauri::State<Mutex<Settings>>) -> String {
+    settings.lock().unwrap().server_url().to_string()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -138,6 +144,13 @@ pub fn run() {
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .plugin(tauri_plugin_window_state::Builder::default().with_state_flags(SAVED_STATE).build())
         .plugin(tauri_plugin_opener::init())
+        .invoke_handler(tauri::generate_handler![
+            server_url,
+            auth::google_login,
+            auth::session_load,
+            auth::session_save,
+            auth::session_clear
+        ])
         .setup(|app| {
             let handle = app.handle().clone();
             let mut s = Settings::load(&handle);

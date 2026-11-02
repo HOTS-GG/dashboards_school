@@ -1,21 +1,36 @@
 /* Design tokens — the single swap point for the separately-made design. */
 :root {
   --font-body: "Pretendard", "Malgun Gothic", system-ui, sans-serif;
+  --text-sm: 13px;
   --text-lg: 18px;
 
+  --space-1: 4px;
+  --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --radius: 12px;
+  --radius-sm: 8px;
 
   --color-surface: rgb(255 255 255 / 0.85);
+  --color-surface-solid: #ffffff;
+  --color-scrim: rgb(0 0 0 / 0.3);
   --color-text: #1b1f24;
   --color-text-muted: #5f6b76;
+  --color-accent: #2563eb;
+  --color-on-accent: #ffffff;
+  --color-ok: #16a34a;
+  --color-warn: #d97706;
+  --color-danger: #dc2626;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --color-surface: rgb(24 27 31 / 0.85);
+    --color-surface-solid: #1d2126;
+    --color-scrim: rgb(0 0 0 / 0.5);
     --color-text: #eef1f4;
     --color-text-muted: #9aa5b0;
+    --color-accent: #60a5fa;
+    --color-on-accent: #0b1220;
   }
 }
