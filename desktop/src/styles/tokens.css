@@ -1,0 +1,21 @@
+/* Design tokens — the single swap point for the separately-made design. */
+:root {
+  --font-body: "Pretendard", "Malgun Gothic", system-ui, sans-serif;
+  --text-lg: 18px;
+
+  --space-3: 12px;
+  --space-4: 16px;
+  --radius: 12px;
+
+  --color-surface: rgb(255 255 255 / 0.85);
+  --color-text: #1b1f24;
+  --color-text-muted: #5f6b76;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: rgb(24 27 31 / 0.85);
+    --color-text: #eef1f4;
+    --color-text-muted: #9aa5b0;
+  }
+}
