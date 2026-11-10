@@ -3,12 +3,16 @@ import "./App.css";
 import { CalendarView } from "./components/CalendarView";
 import { EventDetail } from "./components/EventDetail";
 import { EventForm } from "./components/EventForm";
+import { BellEditor } from "./components/BellEditor";
 import { Login } from "./components/Login";
+import { TimetableEditor } from "./components/TimetableEditor";
+import { TodayStrip } from "./components/TodayStrip";
 import { TIMEZONE } from "./lib/calendar";
 import { clearCache, syncEvents, type EventRecord, type SyncStatus } from "./lib/events";
 import { startNotifier } from "./lib/notify";
 import { currentUser, initClient, logout, pb, refreshSession } from "./lib/pb";
 import { expand } from "./lib/recurrence";
+import { clearTimetableCache, syncTimetable, type TimetableState } from "./lib/timetable";
 
 type Phase = "loading" | "login" | "main" | "error";
 
@@ -37,7 +41,7 @@ function App() {
 
   return (
     <main className="widget">
-      <Header onLogout={phase === "main" ? () => { logout(); clearCache(); setPhase("login"); } : undefined} />
+      <Header onLogout={phase === "main" ? () => { logout(); clearCache(); clearTimetableCache(); setPhase("login"); } : undefined} />
       {phase === "loading" && <section className="widget__empty">불러오는 중…</section>}
       {phase === "error" && <section className="widget__empty" role="alert">시작하지 못했습니다: {error}</section>}
       {phase === "login" && <Login onDone={() => setPhase("main")} />}
@@ -63,7 +67,19 @@ function Header({ onLogout }: { onLogout?: () => void }) {
 type Sheet =
   | { kind: "detail"; key: string }
   | { kind: "form"; eventId?: string; date?: string }
+  | { kind: "timetable" }
+  | { kind: "bells" }
   | null;
+
+const STRIP_KEY = "show-today-strip";
+
+function loadShowStrip() {
+  try {
+    return localStorage.getItem(STRIP_KEY) !== "0";
+  } catch {
+    return true;
+  }
+}
 
 // Occurrences are expanded for the same window the event cache keeps.
 function expansionWindow() {
@@ -75,8 +91,17 @@ function Schedule() {
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [status, setStatus] = useState<SyncStatus>("connecting");
   const [sheet, setSheet] = useState<Sheet>(null);
+  const [timetable, setTimetable] = useState<TimetableState | null>(null);
+  const [showStrip, setShowStrip] = useState(loadShowStrip);
 
   useEffect(() => syncEvents(setEvents, setStatus), []);
+  useEffect(() => syncTimetable(setTimetable), []);
+  const toggleStrip = (show: boolean) => {
+    setShowStrip(show);
+    try {
+      localStorage.setItem(STRIP_KEY, show ? "1" : "0");
+    } catch {}
+  };
   const occurrences = useMemo(() => {
     const { from, to } = expansionWindow();
     return expand(events, from, to);
@@ -98,11 +123,32 @@ function Schedule() {
         <p className={`status status--${status}`} role="status">
           <span className="status__dot" aria-hidden /> {STATUS_LABEL[status]}
         </p>
-        <button className="button button--primary button--small" onClick={() => onCreate()} disabled={status === "offline"}>
-          ＋ 일정
-        </button>
+        <span className="toolbar__actions">
+          <button className="button button--quiet" onClick={() => setSheet({ kind: "timetable" })} disabled={status === "offline"}>
+            시간표
+          </button>
+          <button className="button button--primary button--small" onClick={() => onCreate()} disabled={status === "offline"}>
+            ＋ 일정
+          </button>
+        </span>
       </div>
       <CalendarView occurrences={occurrences} onSelect={onSelect} onCreate={onCreate} />
+      {showStrip && timetable && (
+        <TodayStrip lessons={timetable.lessons} bells={timetable.bells} onOpen={() => setSheet({ kind: "timetable" })} />
+      )}
+      {sheet?.kind === "timetable" && (
+        <TimetableEditor
+          bells={timetable?.bells ?? []}
+          isAdmin={currentUser()?.role === "admin"}
+          showStrip={showStrip}
+          onToggleStrip={toggleStrip}
+          onEditBells={() => setSheet({ kind: "bells" })}
+          onClose={close}
+        />
+      )}
+      {sheet?.kind === "bells" && (
+        <BellEditor bells={timetable?.bells ?? []} onClose={() => setSheet({ kind: "timetable" })} />
+      )}
       {selected && (
         <EventDetail
           occurrence={selected}

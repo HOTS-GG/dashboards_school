@@ -90,13 +90,17 @@ try {
   r = await req("GET", "/collections/timetable_slots/records", tb);
   check("B cannot see A's timetable", r.json?.items?.length === 0, `items=${r.json?.items?.length}`);
 
-  r = await req("POST", "/collections/bell_times/records", ta, { period: 1, start: "08:40", end: "09:30" });
+  // Real bell times may already exist (period is unique), so test with a free period.
+  const used = (await req("GET", "/collections/bell_times/records?perPage=50", su)).json.items.map((b) => b.period);
+  const freePeriod = [9, 8, 7, 6, 5, 4, 3, 2, 1].find((p) => !used.includes(p));
+
+  r = await req("POST", "/collections/bell_times/records", ta, { period: freePeriod, start: "18:00", end: "18:50" });
   check("member cannot set bell times", r.status >= 400, r.status);
 
   await req("PATCH", `/collections/users/records/${Bu.id}`, su, { role: "admin" });
   const tbAdmin = await imp(Bu.id);
 
-  r = await req("POST", "/collections/bell_times/records", tbAdmin, { period: 1, start: "08:40", end: "09:30" });
+  r = await req("POST", "/collections/bell_times/records", tbAdmin, { period: freePeriod, start: "18:00", end: "18:50" });
   check("admin sets bell times", r.status === 200, r.status);
   if (r.json?.id) await req("DELETE", `/collections/bell_times/records/${r.json.id}`, su);
 

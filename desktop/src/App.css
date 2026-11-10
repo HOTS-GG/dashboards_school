@@ -239,3 +239,111 @@ body {
   gap: var(--space-2);
   margin-top: var(--space-3);
 }
+.toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Timetable grid */
+.tt {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--text-sm);
+}
+.tt th {
+  padding: var(--space-1) 0;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.tt thead th:first-child,
+.tt tbody th {
+  width: 24px;
+}
+.tt td {
+  padding: 1px;
+}
+.tt__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 36px;
+  padding: 2px;
+  border: 1px dashed var(--color-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+  overflow: hidden;
+}
+.tt__cell span,
+.tt__cell small {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tt__cell small {
+  color: var(--color-text-muted);
+}
+.tt__cell--filled {
+  border-style: solid;
+  background: var(--color-surface-solid);
+}
+.tt__cell--selected {
+  outline: 2px solid var(--color-accent);
+}
+.tt__form {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+.bell__period {
+  align-self: flex-end;
+  min-width: 44px;
+  padding-bottom: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+/* Today's classes */
+.today {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+.today__summary {
+  flex: none;
+  font-weight: 600;
+}
+.today__list {
+  display: flex;
+  gap: var(--space-2);
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+.today__item--now {
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-radius: 4px;
+  padding: 0 var(--space-1);
+}
+.today__item--next {
+  color: var(--color-text);
+  font-weight: 600;
+}
