@@ -16,9 +16,10 @@
     "@schedule-x/react": "^4.1.0",
     "@schedule-x/theme-default": "^4.9.1",
     "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-notification": "^2.8.1",
     "@tauri-apps/plugin-opener": "^2",
     "pocketbase": "^0.28.2",
-    "preact": "^11.1.1",
+    "preact": "^10.29.8",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "temporal-polyfill": "^0.3.2"

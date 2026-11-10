@@ -4,14 +4,16 @@ import { createViewDay, createViewList, createViewMonthAgenda, createViewWeek } 
 import { createEventsServicePlugin } from "@schedule-x/events-service";
 import "@schedule-x/theme-default/dist/index.css";
 import { scheduleXCalendars, TIMEZONE, toCalendarEvent } from "../lib/calendar";
-import type { EventRecord } from "../lib/events";
+import type { Occurrence } from "../lib/recurrence";
 
 type Props = {
-  events: EventRecord[];
-  onSelect: (id: string) => void;
+  occurrences: Occurrence[];
+  onSelect: (key: string) => void;
+  /** Double-clicking a day or time slot starts a new event on that date. */
+  onCreate: (date: string) => void;
 };
 
-export function CalendarView({ events, onSelect }: Props) {
+export function CalendarView({ occurrences, onSelect, onCreate }: Props) {
   const [eventsService] = useState(() => createEventsServicePlugin());
   const calendar = useCalendarApp(
     {
@@ -22,14 +24,19 @@ export function CalendarView({ events, onSelect }: Props) {
       isDark: window.matchMedia("(prefers-color-scheme: dark)").matches,
       calendars: scheduleXCalendars,
       events: [],
-      callbacks: { onEventClick: (e) => onSelect(String(e.id)) },
+      callbacks: {
+        onEventClick: (e) => onSelect(String(e.id)),
+        onDoubleClickDate: (d) => onCreate(d.toString()),
+        onDoubleClickAgendaDate: (d) => onCreate(d.toString()),
+        onDoubleClickDateTime: (dt) => onCreate(dt.toPlainDate().toString()),
+      },
     },
     [eventsService],
   );
 
   useEffect(() => {
-    if (calendar) eventsService.set(events.map(toCalendarEvent));
-  }, [calendar, events, eventsService]);
+    if (calendar) eventsService.set(occurrences.map(toCalendarEvent));
+  }, [calendar, occurrences, eventsService]);
 
   return (
     <div className="calendar">

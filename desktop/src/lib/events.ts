@@ -10,6 +10,8 @@ export type EventRecord = RecordModel & {
   all_day: boolean;
   category: "" | "학사" | "회의" | "행사" | "출장" | "기타";
   rrule: string;
+  /** Local start dates ("YYYY-MM-DD") of skipped repeats. */
+  exdates: string[] | null;
   owner: string;
   expand?: { owner?: { id: string; name: string } };
 };
@@ -54,7 +56,8 @@ function windowBounds() {
 async function fetchWindow(): Promise<EventRecord[]> {
   const { from, to } = windowBounds();
   return pb().collection("events").getFullList<EventRecord>({
-    filter: pb().filter("end >= {:from} && start <= {:to}", { from, to }),
+    // Repeating events can start long before the window, so fetch all of them.
+    filter: pb().filter('(end >= {:from} || rrule != "") && start <= {:to}', { from, to }),
     sort: "start",
     expand: "owner",
     fields: "*,expand.owner.id,expand.owner.name",
@@ -133,4 +136,34 @@ export function syncEvents(
     client.realtime.onDisconnect = undefined;
     for (const u of unsubs) void u().catch(() => {});
   };
+}
+
+export type EventInput = Pick<
+  EventRecord,
+  "title" | "description" | "location" | "start" | "end" | "all_day" | "category" | "rrule"
+>;
+
+const ownerFields = { expand: "owner", fields: "*,expand.owner.id,expand.owner.name" };
+
+export function createEvent(input: EventInput) {
+  return pb().collection("events").create<EventRecord>({ ...input, owner: pb().authStore.record!.id }, ownerFields);
+}
+
+export function updateEvent(id: string, input: Partial<EventInput>) {
+  return pb().collection("events").update<EventRecord>(id, input, ownerFields);
+}
+
+export function deleteEvent(id: string) {
+  return pb().collection("events").delete(id);
+}
+
+/** Removes one occurrence of a repeating event. */
+export function skipOccurrence(event: EventRecord, date: string) {
+  const exdates = [...new Set([...(event.exdates ?? []), date])];
+  return pb().collection("events").update<EventRecord>(event.id, { exdates }, ownerFields);
+}
+
+export function canEdit(event: EventRecord): boolean {
+  const me = pb().authStore.record;
+  return !!me && (event.owner === me.id || me.role === "admin");
 }

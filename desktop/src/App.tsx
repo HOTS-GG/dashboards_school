@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import { CalendarView } from "./components/CalendarView";
 import { EventDetail } from "./components/EventDetail";
+import { EventForm } from "./components/EventForm";
 import { Login } from "./components/Login";
+import { TIMEZONE } from "./lib/calendar";
 import { clearCache, syncEvents, type EventRecord, type SyncStatus } from "./lib/events";
+import { startNotifier } from "./lib/notify";
 import { currentUser, initClient, logout, pb, refreshSession } from "./lib/pb";
+import { expand } from "./lib/recurrence";
 
 type Phase = "loading" | "login" | "main" | "error";
 
@@ -56,21 +60,59 @@ function Header({ onLogout }: { onLogout?: () => void }) {
   );
 }
 
+type Sheet =
+  | { kind: "detail"; key: string }
+  | { kind: "form"; eventId?: string; date?: string }
+  | null;
+
+// Occurrences are expanded for the same window the event cache keeps.
+function expansionWindow() {
+  const today = Temporal.Now.plainDateISO(TIMEZONE);
+  return { from: today.subtract({ months: 3 }).with({ day: 1 }), to: today.add({ months: 7 }).with({ day: 1 }) };
+}
+
 function Schedule() {
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [status, setStatus] = useState<SyncStatus>("connecting");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [sheet, setSheet] = useState<Sheet>(null);
 
   useEffect(() => syncEvents(setEvents, setStatus), []);
-  const selected = useMemo(() => events.find((e) => e.id === selectedId) ?? null, [events, selectedId]);
+  const occurrences = useMemo(() => {
+    const { from, to } = expansionWindow();
+    return expand(events, from, to);
+  }, [events]);
+
+  const latest = useRef(occurrences);
+  latest.current = occurrences;
+  useEffect(() => startNotifier(() => latest.current), []);
+
+  const selected = sheet?.kind === "detail" ? occurrences.find((o) => o.key === sheet.key) : undefined;
+  const editing = sheet?.kind === "form" && sheet.eventId ? events.find((e) => e.id === sheet.eventId) : undefined;
+  const onSelect = useCallback((key: string) => setSheet({ kind: "detail", key }), []);
+  const onCreate = useCallback((date?: string) => setSheet({ kind: "form", date }), []);
+  const close = useCallback(() => setSheet(null), []);
 
   return (
     <>
-      <p className={`status status--${status}`} role="status">
-        <span className="status__dot" aria-hidden /> {STATUS_LABEL[status]}
-      </p>
-      <CalendarView events={events} onSelect={setSelectedId} />
-      {selected && <EventDetail event={selected} onClose={() => setSelectedId(null)} />}
+      <div className="toolbar">
+        <p className={`status status--${status}`} role="status">
+          <span className="status__dot" aria-hidden /> {STATUS_LABEL[status]}
+        </p>
+        <button className="button button--primary button--small" onClick={() => onCreate()} disabled={status === "offline"}>
+          ＋ 일정
+        </button>
+      </div>
+      <CalendarView occurrences={occurrences} onSelect={onSelect} onCreate={onCreate} />
+      {selected && (
+        <EventDetail
+          occurrence={selected}
+          onEdit={() => setSheet({ kind: "form", eventId: selected.event.id })}
+          onClose={close}
+        />
+      )}
+      {sheet?.kind === "form" && (!sheet.eventId || editing) && (
+        <EventForm event={editing} date={sheet.date} onClose={close} />
+      )}
     </>
   );
 }

@@ -1,6 +1,6 @@
 import "temporal-polyfill/global";
 import type { CalendarEventExternal } from "@schedule-x/calendar";
-import type { EventRecord } from "./events";
+import type { Occurrence } from "./recurrence";
 
 export const TIMEZONE = "Asia/Seoul";
 
@@ -31,29 +31,32 @@ export function toZoned(pbDate: string): Temporal.ZonedDateTime {
   return Temporal.Instant.from(pbDate.replace(" ", "T")).toZonedDateTimeISO(TIMEZONE);
 }
 
-export function toCalendarEvent(e: EventRecord): CalendarEventExternal {
-  const start = toZoned(e.start);
-  const end = toZoned(e.end);
+export function toCalendarEvent(o: Occurrence): CalendarEventExternal {
+  const e = o.event;
   return {
-    id: e.id,
+    id: o.key,
     title: e.title,
     location: e.location || undefined,
     description: e.description || undefined,
     people: e.expand?.owner?.name ? [e.expand.owner.name] : undefined,
     calendarId: CATEGORIES[(e.category || "기타") as keyof typeof CATEGORIES].colorName,
     // All-day events span whole dates (end date inclusive).
-    start: e.all_day ? start.toPlainDate() : start,
-    end: e.all_day ? end.toPlainDate() : end,
+    start: e.all_day ? o.start.toPlainDate() : o.start,
+    end: e.all_day ? o.end.toPlainDate() : o.end,
   };
 }
 
-export function formatRange(e: EventRecord): string {
-  const s = toZoned(e.start);
-  const en = toZoned(e.end);
+export function formatRange(o: Occurrence): string {
+  const { start: s, end: en } = o;
   const date = (d: Temporal.ZonedDateTime) =>
     d.toLocaleString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
   const time = (d: Temporal.ZonedDateTime) => d.toLocaleString("ko-KR", { hour: "numeric", minute: "2-digit" });
   const sameDay = s.toPlainDate().equals(en.toPlainDate());
-  if (e.all_day) return sameDay ? `${date(s)} 종일` : `${date(s)} – ${date(en)} 종일`;
+  if (o.event.all_day) return sameDay ? `${date(s)} 종일` : `${date(s)} – ${date(en)} 종일`;
   return sameDay ? `${date(s)} ${time(s)} – ${time(en)}` : `${date(s)} ${time(s)} – ${date(en)} ${time(en)}`;
+}
+
+/** Converts a local Seoul date + time to the UTC instant PocketBase stores. */
+export function toPbDate(date: string, time = "00:00"): string {
+  return Temporal.PlainDateTime.from(`${date}T${time}`).toZonedDateTime(TIMEZONE).toInstant().toString();
 }

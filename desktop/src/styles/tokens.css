@@ -16,6 +16,7 @@
   --color-scrim: rgb(0 0 0 / 0.3);
   --color-text: #1b1f24;
   --color-text-muted: #5f6b76;
+  --color-border: #d4d9de;
   --color-accent: #2563eb;
   --color-on-accent: #ffffff;
   --color-ok: #16a34a;
@@ -30,6 +31,7 @@
     --color-scrim: rgb(0 0 0 / 0.5);
     --color-text: #eef1f4;
     --color-text-muted: #9aa5b0;
+    --color-border: #3a4149;
     --color-accent: #60a5fa;
     --color-on-accent: #0b1220;
   }

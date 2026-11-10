@@ -28,6 +28,7 @@ tauri-plugin-window-state = "2"
 windows = { version = "0.62", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_Graphics_Gdi"] }
 keyring = { version = "3", features = ["windows-native"] }
 url = "2"
+tauri-plugin-notification = "2"
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
