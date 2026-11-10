@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   copyTerm,
@@ -15,8 +16,6 @@ const DEFAULT_PERIODS = 7;
 type Props = {
   bells: BellTime[];
   isAdmin: boolean;
-  showStrip: boolean;
-  onToggleStrip: (show: boolean) => void;
   onEditBells: () => void;
   onClose: () => void;
 };
@@ -26,7 +25,7 @@ function termLabel(term: string) {
   return `${y}학년도 ${t}학기`;
 }
 
-export function TimetableEditor({ bells, isAdmin, showStrip, onToggleStrip, onEditBells, onClose }: Props) {
+export function TimetableEditor({ bells, isAdmin, onEditBells, onClose }: Props) {
   const thisTerm = currentTerm();
   const [term, setTerm] = useState(thisTerm);
   const [lessons, setLessons] = useState<Lesson[] | null>(null);
@@ -69,7 +68,7 @@ export function TimetableEditor({ bells, isAdmin, showStrip, onToggleStrip, onEd
       <div className="sheet__card">
         <header className="sheet__header">
           <h2 className="sheet__title">내 시간표</h2>
-          <button className="button button--icon" onClick={onClose} aria-label="닫기">✕</button>
+          <button className="button button--icon" onClick={onClose} aria-label="닫기"><Icon name="close" /></button>
         </header>
 
         <div className="field-row">
@@ -139,10 +138,6 @@ export function TimetableEditor({ bells, isAdmin, showStrip, onToggleStrip, onEd
         )}
         {error && <p className="login__error" role="alert">{error}</p>}
 
-        <label className="field field--inline">
-          <input type="checkbox" checked={showStrip} onChange={(e) => onToggleStrip(e.target.checked)} />
-          <span>위젯 아래에 오늘 수업 표시</span>
-        </label>
         {bells.length === 0 && (
           <p className="field__hint">
             교시 시각이 아직 없어 현재 교시를 표시할 수 없습니다.{isAdmin ? "" : " 관리자에게 요청하세요."}

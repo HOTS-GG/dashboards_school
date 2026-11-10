@@ -4,14 +4,23 @@ import type { Occurrence } from "./recurrence";
 
 export const TIMEZONE = "Asia/Seoul";
 
-// Category → Schedule-X calendar (colour group). Colours are placeholders until the design pass.
+// Category → "line colour", like subway lines; `badge` is the letter on its round badge, so
+// a category never relies on colour alone. `main` carries white text at ≥4.5:1; `dark` is
+// the same line lifted for marks on the dark theme.
+// Keep in sync with the --line-* tokens in styles/tokens.css.
 export const CATEGORIES = {
-  학사: { colorName: "academic", main: "#2563eb", container: "#dbeafe", onContainer: "#1e3a8a" },
-  회의: { colorName: "meeting", main: "#7c3aed", container: "#ede9fe", onContainer: "#4c1d95" },
-  행사: { colorName: "event", main: "#db2777", container: "#fce7f3", onContainer: "#831843" },
-  출장: { colorName: "trip", main: "#d97706", container: "#fef3c7", onContainer: "#78350f" },
-  기타: { colorName: "other", main: "#4b5563", container: "#e5e7eb", onContainer: "#111827" },
+  학사: { colorName: "academic", badge: "학", main: "#0052a4", dark: "#6ea8ff", container: "#dce8f6", onContainer: "#00264d" },
+  회의: { colorName: "meeting", badge: "회", main: "#7d4f93", dark: "#c99be2", container: "#efe5f4", onContainer: "#3b2047" },
+  행사: { colorName: "event", badge: "행", main: "#00843d", dark: "#4fd08a", container: "#dcf1e4", onContainer: "#003d1c" },
+  출장: { colorName: "trip", badge: "출", main: "#c25a00", dark: "#ff9d50", container: "#fbe7d6", onContainer: "#5c2a00" },
+  기타: { colorName: "other", badge: "기", main: "#5f6773", dark: "#aab2bd", container: "#e7e9ec", onContainer: "#1f242b" },
 } as const;
+
+export type Category = keyof typeof CATEGORIES;
+
+export function categoryOf(c: string | undefined): (typeof CATEGORIES)[Category] {
+  return CATEGORIES[(c || "기타") as Category] ?? CATEGORIES.기타;
+}
 
 export const scheduleXCalendars = Object.fromEntries(
   Object.entries(CATEGORIES).map(([label, c]) => [
@@ -20,7 +29,7 @@ export const scheduleXCalendars = Object.fromEntries(
       colorName: c.colorName,
       label,
       lightColors: { main: c.main, container: c.container, onContainer: c.onContainer },
-      darkColors: { main: c.main, container: c.onContainer, onContainer: c.container },
+      darkColors: { main: c.dark, container: c.onContainer, onContainer: c.container },
       readonly: true,
     },
   ]),
@@ -39,7 +48,7 @@ export function toCalendarEvent(o: Occurrence): CalendarEventExternal {
     location: e.location || undefined,
     description: e.description || undefined,
     people: e.expand?.owner?.name ? [e.expand.owner.name] : undefined,
-    calendarId: CATEGORIES[(e.category || "기타") as keyof typeof CATEGORIES].colorName,
+    calendarId: categoryOf(e.category).colorName,
     // All-day events span whole dates (end date inclusive).
     start: e.all_day ? o.start.toPlainDate() : o.start,
     end: e.all_day ? o.end.toPlainDate() : o.end,

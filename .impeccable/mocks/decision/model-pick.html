@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<style>
+  *{box-sizing:border-box;margin:0}
+  html,body{width:380px;height:560px;overflow:hidden;font-family:"Segoe UI Variable Text","Segoe UI","Malgun Gothic",sans-serif;background:#7a8fa6}
+  .w{position:absolute;inset:0;border-radius:12px;background:rgba(251,251,250,.95);color:#1f2328;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.7)}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px}
+  .mon{font-size:22px;font-weight:700;letter-spacing:-.01em}
+  .mon small{font-size:12px;font-weight:500;color:#6b7280;margin-left:6px}
+  .add{font-size:12px;background:#1d4ed8;color:#fff;border-radius:6px;padding:4px 10px;font-weight:600}
+  .sub{padding:0 16px 8px;font-size:11px;color:#6b7280;display:flex;gap:10px}
+  .sub i{display:inline-block;width:8px;height:3px;border-radius:2px;margin-right:4px;vertical-align:middle}
+  .grid{flex:1;margin:0 10px;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:18px repeat(4,1fr);border-top:2px solid #1f2328}
+  .grid > div{border-right:1px solid #e3e3df;border-bottom:1px solid #e3e3df;padding:3px 4px;font-size:10.5px;position:relative;overflow:hidden}
+  .grid > div:nth-child(5n){border-right:0}
+  .h{font-size:10px;color:#6b7280;font-weight:600;border-bottom:1px solid #c9c9c4 !important}
+  .n{font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;color:#4b5563}
+  .e{display:block;margin-top:2px;line-height:1.25;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bl{color:#1d4ed8}.rd{color:#d6312a}.gr{color:#1f8a4c}.bk{color:#2b2b2b}
+  .today{background:#fff7d6}
+  .mag{position:absolute;top:3px;right:4px;width:11px;height:11px;border-radius:50%;background:#d6312a;box-shadow:0 1px 2px rgba(0,0,0,.35)}
+  .note{margin:8px 10px 0;padding:8px 10px;border-left:3px solid #d6312a;background:#fff;font-size:12px;border-radius:0 6px 6px 0;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .note b{font-weight:700}
+  .strip{display:flex;gap:10px;align-items:center;font-size:12px;padding:9px 16px;border-top:1px solid #e3e3df;margin-top:8px}
+  .strip b{font-weight:700}
+  .chip{color:#6b7280}
+  .chip.n{color:#d6312a;font-weight:700}
+</style></head><body>
+<div class="w">
+  <div class="top"><span class="mon">11월 <small>월중계획</small></span><span class="add">＋ 일정</span></div>
+  <div class="sub"><span><i style="background:#1d4ed8"></i>학사</span><span><i style="background:#d6312a"></i>행사</span><span><i style="background:#1f8a4c"></i>회의</span><span><i style="background:#2b2b2b"></i>출장·기타</span></div>
+  <div class="grid">
+    <div class="h">월</div><div class="h">화</div><div class="h">수</div><div class="h">목</div><div class="h">금</div>
+    <div><span class="n">3</span><span class="e bl">학부모 상담</span></div><div><span class="n">4</span></div><div><span class="n">5</span><span class="e gr">교과협의회</span></div><div><span class="n">6</span></div><div><span class="n">7</span><span class="e rd">체육대회</span></div>
+    <div><span class="n">10</span></div><div class="today"><span class="mag"></span><span class="n">11</span><span class="e rd">진로 특강</span><span class="e gr">2학년 협의</span></div><div><span class="n">12</span><span class="e bk">연수 출장</span></div><div><span class="n">13</span><span class="e bl">수능</span><span class="e bl">재량휴업</span></div><div><span class="n">14</span></div>
+    <div><span class="n">17</span><span class="e gr">학년부장 회의</span></div><div><span class="n">18</span></div><div><span class="n">19</span><span class="e bl">2차 지필 계획</span></div><div><span class="n">20</span></div><div><span class="n">21</span><span class="e rd">동아리 발표</span></div>
+    <div><span class="n">24</span></div><div><span class="n">25</span><span class="e gr">교직원 회의</span></div><div><span class="n">26</span></div><div><span class="n">27</span></div><div><span class="n">28</span><span class="e bl">생기부 점검</span></div>
+  </div>
+  <div class="note"><b>15:30</b> 2학년 협의회 · 3층 회의실 <span style="color:#6b7280">— 12분 후</span></div>
+  <div class="strip"><b>지금 6교시</b><span class="chip">2 수학 2-3</span><span class="chip n">6 수학 2-5</span><span class="chip">7 창체</span></div>
+</div>
+</body></html>

@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-11T00:30:00+09:00",
+  "title": "Design System: 학교 일정 (School Schedule Widget)",
+  "extensions": {
+    "colorMeta": {
+      "line-academic": { "role": "primary", "displayName": "Line 1 Blue", "tonalRamp": ["#001a3a", "#00264d", "#003a75", "#0052a4", "#3a78c4", "#6ea8ff", "#a9cbf2", "#dce8f6"] },
+      "line-meeting": { "role": "primary", "displayName": "Line Violet", "tonalRamp": ["#26142e", "#3b2047", "#5a3570", "#7d4f93", "#9f73b5", "#c99be2", "#dcc2ea", "#efe5f4"] },
+      "line-event": { "role": "primary", "displayName": "Line Green", "tonalRamp": ["#00260f", "#003d1c", "#005e2b", "#00843d", "#2fae64", "#4fd08a", "#9fe3bd", "#dcf1e4"] },
+      "line-trip": { "role": "primary", "displayName": "Line Orange", "tonalRamp": ["#3a1900", "#5c2a00", "#8a4200", "#c25a00", "#e67a22", "#ff9d50", "#fcc69a", "#fbe7d6"] },
+      "line-other": { "role": "primary", "displayName": "Line Slate", "tonalRamp": ["#13171c", "#1f242b", "#3c434d", "#5f6773", "#858d98", "#aab2bd", "#cdd2d8", "#e7e9ec"] },
+      "now-amber": { "role": "secondary", "displayName": "Platform Amber" },
+      "board": { "role": "neutral", "displayName": "Board Black" },
+      "ground-light": { "role": "neutral", "displayName": "Cool Mist", "canonical": "rgb(246 247 249 / 0.92)" },
+      "ground-dark": { "role": "neutral", "displayName": "Night Platform", "canonical": "rgb(28 31 36 / 0.9)" }
+    },
+    "typographyMeta": {
+      "countdown": { "displayName": "Countdown", "purpose": "Minutes until the next event; the only large type on the main window." },
+      "headline": { "displayName": "Headline", "purpose": "Sheet titles." },
+      "title": { "displayName": "Title", "purpose": "Next event title on the board, header date." },
+      "body": { "displayName": "Body", "purpose": "Board rows, inputs, memo text." },
+      "label": { "displayName": "Label", "purpose": "Field labels, meta, states. The smallest functional size." }
+    },
+    "shadows": [
+      { "name": "board-lift", "value": "0 2px 8px rgb(0 0 0 / 0.18)", "purpose": "Separates the board from the ground." },
+      { "name": "sheet", "value": "0 8px 24px rgb(21 24 29 / 0.14), 0 1px 3px rgb(21 24 29 / 0.08)", "purpose": "Rising sheets (light theme)." },
+      { "name": "segment", "value": "0 1px 2px rgb(0 0 0 / 0.12)", "purpose": "Selected option in segmented controls." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "All state transitions and sheet entrances." },
+      { "name": "board-arrive", "value": "900ms amber sweep on a row entering 진행 중", "purpose": "The one authored moment; disabled under reduced motion." },
+      { "name": "sheet-rise", "value": "240ms translateY(24px) to 0", "purpose": "Sheets entering; disabled under reduced motion." }
+    ],
+    "breakpoints": [
+      { "name": "widget-default", "value": "380px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Departure Board",
+      "kind": "custom",
+      "refersTo": "board",
+      "description": "Countdown to the next event plus today's timed events as rows.",
+      "html": "<section class=\"ds-board\"><div class=\"ds-board-lead\"><span class=\"ds-count\">12<small>분</small></span><span><b>2학년 협의회</b><br><span class=\"ds-meta\">15:30 · 3층 회의실</span></span></div><div class=\"ds-row ds-row-now\"><span class=\"ds-time\">14:40</span><span class=\"ds-badge\" style=\"background:#00843d\">행</span><span>진로 특강</span><span class=\"ds-state\">진행 중</span></div><div class=\"ds-row\"><span class=\"ds-time\">15:30</span><span class=\"ds-badge\" style=\"background:#7d4f93\">회</span><span>2학년 협의회</span><span class=\"ds-state\">12분 후</span></div></section>",
+      "css": ".ds-board{background:#15181d;color:#f2f4f6;border-radius:10px;padding:12px 12px 4px;font-family:'Segoe UI','Malgun Gothic',sans-serif;width:340px;box-shadow:0 2px 8px rgb(0 0 0/.18)}.ds-board-lead{display:flex;gap:12px;align-items:baseline;padding-bottom:8px;border-bottom:1px solid #2a2f37}.ds-count{font-size:36px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}.ds-count small{font-size:14px;color:#a9b1bb;margin-left:2px}.ds-meta{font-size:12px;color:#a9b1bb}.ds-row{display:grid;grid-template-columns:3.2em 22px 1fr auto;gap:8px;align-items:center;padding:7px 2px;font-size:13px;border-top:1px solid #2a2f37}.ds-row:hover{background:rgb(255 255 255/.06)}.ds-time{color:#a9b1bb;font-variant-numeric:tabular-nums}.ds-state{font-size:12px;color:#a9b1bb}.ds-row-now,.ds-row-now .ds-time,.ds-row-now .ds-state{color:#ffb81c;font-weight:600}.ds-badge{width:20px;height:20px;border-radius:50%;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center}"
+    },
+    {
+      "name": "Line Badge",
+      "kind": "chip",
+      "refersTo": "line-badge",
+      "description": "Category letter on its line colour.",
+      "html": "<span class=\"ds-badge\" style=\"background:#0052a4\">학</span> <span class=\"ds-badge\" style=\"background:#7d4f93\">회</span> <span class=\"ds-badge\" style=\"background:#00843d\">행</span> <span class=\"ds-badge\" style=\"background:#c25a00\">출</span> <span class=\"ds-badge\" style=\"background:#5f6773\">기</span>",
+      "css": ".ds-badge{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;color:#fff;font:700 11px 'Segoe UI','Malgun Gothic',sans-serif}"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action (＋ 일정, 저장, 수정).",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"><path d=\"M8 3.5v9M3.5 8h9\"/></svg> 일정</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;background:#0052a4;color:#fff;border:0;border-radius:7px;padding:6px 12px;font:600 13px 'Segoe UI','Malgun Gothic',sans-serif;cursor:pointer;transition:background-color 160ms cubic-bezier(.16,1,.3,1)}.ds-btn-primary:hover{background:color-mix(in srgb,#0052a4 86%,#15181d)}.ds-btn-primary:focus-visible{outline:2px solid #0052a4;outline-offset:2px}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Secondary actions (시간표, 취소, 로그아웃).",
+      "html": "<button class=\"ds-btn-quiet\">시간표</button>",
+      "css": ".ds-btn-quiet{background:transparent;color:#4e5661;border:0;border-radius:7px;padding:6px 8px;font:13px 'Segoe UI','Malgun Gothic',sans-serif;cursor:pointer}.ds-btn-quiet:hover{background:#eceef1;color:#15181d}.ds-btn-quiet:focus-visible{outline:2px solid #0052a4;outline-offset:2px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Form inputs in sheets.",
+      "html": "<label class=\"ds-field\"><span>제목</span><input value=\"2학년 협의회\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:6px;font-family:'Segoe UI','Malgun Gothic',sans-serif;width:260px}.ds-field span{font-size:12px;font-weight:600;color:#4e5661}.ds-field input{min-height:34px;padding:6px 8px;border:1px solid #c3c8cf;border-radius:7px;background:#fff;color:#15181d;font-size:14px}.ds-field input:focus{border-color:#0052a4;outline:1px solid #0052a4}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "nav",
+      "refersTo": "button-quiet",
+      "description": "Theme, text size and calendar view choices.",
+      "html": "<div class=\"ds-seg\"><span class=\"on\">월</span><span>주</span><span>일</span><span>목록</span></div>",
+      "css": ".ds-seg{display:inline-flex;gap:2px;padding:2px;border-radius:7px;background:#eceef1;font:12px 'Segoe UI','Malgun Gothic',sans-serif}.ds-seg span{padding:3px 8px;border-radius:5px;color:#4e5661;cursor:pointer}.ds-seg span.on{background:#fff;color:#15181d;font-weight:600;box-shadow:0 1px 2px rgb(0 0 0/.12)}"
+    },
+    {
+      "name": "Current Lesson Chip",
+      "kind": "chip",
+      "refersTo": "lesson-now-chip",
+      "description": "Today's-lessons strip; amber only for the lesson happening now.",
+      "html": "<div class=\"ds-strip\"><b>지금 6교시</b><span>2 수학 2-3</span><span class=\"now\">6 수학 2-5</span><span class=\"next\">7 창체</span></div>",
+      "css": ".ds-strip{display:flex;gap:8px;align-items:center;font:13px 'Segoe UI','Malgun Gothic',sans-serif;color:#4e5661}.ds-strip b{color:#15181d}.ds-strip span{padding:1px 6px;border-radius:5px}.ds-strip .now{background:#ffb81c;color:#15181d;font-weight:600}.ds-strip .next{color:#15181d;font-weight:600;box-shadow:inset 0 0 0 1px #c3c8cf}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Platform Board",
+    "overview": "The widget is a subway platform's departure board brought to a teacher's desktop. One inverted dark panel sits at the top of a quiet translucent window and answers the only question a glance has time for: what's next, and how long until it. The countdown is the one large thing on screen; everything else is small, aligned and tabular, like rows of trains in time order. Categories are read as line colours on round lettered badges, the way riders read line numbers.\n\nDensity is calm rather than sparse: every row carries a time, a badge, a title and a relative state, and the calendar below is a working month view. The window belongs on Windows 11 — system type, neutral translucent ground, standard controls — and the world enters only through the board, the line colours, the reserved amber and the tabular rhythm.",
+    "keyCharacteristics": [
+      "One inverted board panel (dark in both themes); the rest of the window is neutral and translucent.",
+      "Hierarchy by scale contrast: a 36px countdown against 12–16px everything else.",
+      "Five category line colours, each on a lettered badge so colour is never the only cue.",
+      "A single reserved amber for \"happening now\".",
+      "Tabular numerals wherever time is shown.",
+      "Light, dark or automatic theme, and four text sizes, chosen per PC."
+    ],
+    "rules": [
+      { "name": "The Reserved Amber Rule", "body": "Platform Amber means \"happening now\" and nothing else: the in-progress board row and the current lesson. It never decorates, highlights, warns or marks selection.", "section": "colors" },
+      { "name": "The Line Letter Rule", "body": "A category is always shown as its line colour with its letter (학 회 행 출 기). Colour alone never identifies a category.", "section": "colors" },
+      { "name": "The Quiet Past Rule", "body": "Events that have ended stay on the board, marked 지남, in the board's muted ink with a dimmed badge. The day keeps its shape; nothing silently disappears.", "section": "colors" },
+      { "name": "The One Big Number Rule", "body": "Only the countdown is set large. Nothing else on the main window exceeds title size.", "section": "typography" },
+      { "name": "The Timetable Figures Rule", "body": "Every time, date and period number uses tabular numerals, so columns of times align like a printed timetable.", "section": "typography" },
+      { "name": "The One Inverted Panel Rule", "body": "The board is the only dark-on-light (or darker-on-dark) panel. Other content sits directly on the ground or in sheets; no nested cards.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the countdown as the only large type on the main window (2.571rem).",
+      "Do pair every category colour with its letter badge.",
+      "Do use tabular numerals for every time, date and period.",
+      "Do keep ended events visible as 지남, in muted board ink.",
+      "Do keep functional text at 0.857rem or larger so it stays ≥11px at the smallest text size.",
+      "Do theme browser defaults from tokens: selection, caret, focus ring, scrollbars."
+    ],
+    "donts": [
+      "Don't use Platform Amber for anything except what is happening now.",
+      "Don't add a second inverted panel or nest cards inside the board.",
+      "Don't use Unicode glyphs or emoji as icons; add paths to the shared icon set.",
+      "Don't put coloured side stripes on rows, cards or callouts.",
+      "Don't add kickers or eyebrow labels above headings."
+    ]
+  }
+}

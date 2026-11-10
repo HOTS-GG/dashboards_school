@@ -1,38 +1,97 @@
-/* Design tokens — the single swap point for the separately-made design. */
+/*
+ * Design tokens — "승강장 행선 안내" (platform departure board).
+ * The single swap point for the look: components use only these variables.
+ * Theme comes from <html data-theme="light|dark"> and text size from
+ * --text-scale (both set by lib/prefs.ts).
+ */
 :root {
-  --font-body: "Pretendard", "Malgun Gothic", system-ui, sans-serif;
-  --text-sm: 13px;
-  --text-lg: 18px;
+  --text-scale: 1;
+  font-size: calc(14px * var(--text-scale));
+
+  --font-ui: "Segoe UI Variable Text", "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+
+  /* Type scale (rem follows the text-size setting). Smallest functional text ≥ 11px. */
+  --text-xs: 0.857rem; /* 12px */
+  --text-sm: 0.929rem; /* 13px */
+  --text-md: 1rem; /* 14px */
+  --text-lg: 1.143rem; /* 16px */
+  --text-xl: 1.429rem; /* 20px */
+  --text-count: 2.571rem; /* 36px: the countdown numeral */
 
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
-  --radius: 12px;
-  --radius-sm: 8px;
+  --space-5: 20px;
+  --radius: 14px;
+  --radius-md: 10px;
+  --radius-sm: 7px;
 
-  --color-surface: rgb(255 255 255 / 0.85);
-  --color-surface-solid: #ffffff;
-  --color-scrim: rgb(0 0 0 / 0.3);
-  --color-text: #1b1f24;
-  --color-text-muted: #5f6b76;
-  --color-border: #d4d9de;
-  --color-accent: #2563eb;
-  --color-on-accent: #ffffff;
-  --color-ok: #16a34a;
-  --color-warn: #d97706;
-  --color-danger: #dc2626;
+  /* Category "line colours" (white text ≥ 4.5:1). Mirror of CATEGORIES in lib/calendar.ts. */
+  --line-academic: #0052a4;
+  --line-meeting: #7d4f93;
+  --line-event: #00843d;
+  --line-trip: #c25a00;
+  --line-other: #5f6773;
+
+  /* Reserved for what is happening right now: in-progress events and the current lesson. Nothing else. */
+  --now: #ffb81c;
+  --on-now: #15181d;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-surface: rgb(24 27 31 / 0.85);
-    --color-surface-solid: #1d2126;
-    --color-scrim: rgb(0 0 0 / 0.5);
-    --color-text: #eef1f4;
-    --color-text-muted: #9aa5b0;
-    --color-border: #3a4149;
-    --color-accent: #60a5fa;
-    --color-on-accent: #0b1220;
-  }
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ground: rgb(246 247 249 / 0.92);
+  --ground-solid: #f6f7f9;
+  --surface: #ffffff;
+  --surface-sunk: #eceef1;
+  --ink: #15181d;
+  --ink-muted: #4e5661;
+  --ink-faint: #6b737e;
+  --rule: #dcdfe4;
+  --rule-strong: #c3c8cf;
+  --accent: #0052a4;
+  --on-accent: #ffffff;
+  --scrim: rgb(21 24 29 / 0.28);
+  --ok: #128043;
+  --warn: #b45309;
+  --danger: #c42b1c;
+  --shadow: 0 8px 24px rgb(21 24 29 / 0.14), 0 1px 3px rgb(21 24 29 / 0.08);
+  --edge: rgb(255 255 255 / 0.7);
+
+  /* The board stays dark in both themes: it is the one inverted panel. */
+  --board: #15181d;
+  --board-ink: #f2f4f6;
+  --board-muted: #a9b1bb;
+  --board-rule: #2a2f37;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: rgb(28 31 36 / 0.9);
+  --ground-solid: #1c1f24;
+  --surface: #262a31;
+  --surface-sunk: #15181c;
+  --ink: #eef1f4;
+  --ink-muted: #b3bbc5;
+  --ink-faint: #949daa;
+  --rule: #353a43;
+  --rule-strong: #4a515c;
+  --accent: #6cb4ff;
+  --on-accent: #0b1a2c;
+  --scrim: rgb(0 0 0 / 0.5);
+  --ok: #4ade80;
+  --warn: #fbbf24;
+  --danger: #ff8a7a;
+  --shadow: 0 8px 24px rgb(0 0 0 / 0.45), 0 1px 3px rgb(0 0 0 / 0.4);
+  --edge: rgb(255 255 255 / 0.08);
+
+  --board: #0e1013;
+  --board-ink: #f2f4f6;
+  --board-muted: #a9b1bb;
+  --board-rule: #272b32;
 }

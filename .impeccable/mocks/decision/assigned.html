@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<style>
+  *{box-sizing:border-box;margin:0}
+  html,body{width:380px;height:560px;overflow:hidden;font-family:"Segoe UI Variable Text","Segoe UI","Malgun Gothic",sans-serif;background:#7a8fa6}
+  .w{position:absolute;inset:0;border-radius:12px;background:rgba(244,245,247,.92);color:#15181d;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.6)}
+  .top{display:flex;justify-content:space-between;align-items:baseline;padding:14px 16px 6px}
+  .date{font-size:15px;font-weight:600}
+  .live{font-size:11px;color:#5b6470;display:flex;gap:5px;align-items:center}
+  .live i{width:7px;height:7px;border-radius:50%;background:#16a34a;display:inline-block}
+  .board{margin:4px 10px 8px;border-radius:10px;background:#15181d;color:#f4f5f7;padding:10px 12px 8px}
+  .board h3{font-size:10px;letter-spacing:.08em;color:#9aa3ad;font-weight:600;margin-bottom:6px}
+  .next{display:flex;align-items:baseline;gap:8px;padding-bottom:8px;border-bottom:1px solid #2a2f37}
+  .big{font-size:34px;font-weight:600;font-variant-numeric:tabular-nums;color:#ffb81c;line-height:1}
+  .big small{font-size:13px;font-weight:500;margin-left:2px}
+  .nt{font-size:14px;font-weight:600}
+  .ns{font-size:11px;color:#9aa3ad}
+  .row{display:grid;grid-template-columns:42px 22px 1fr auto;gap:8px;align-items:center;font-size:12.5px;padding:6px 0;border-bottom:1px solid #22262d}
+  .row:last-child{border:0}
+  .t{font-variant-numeric:tabular-nums;color:#c9d0d8}
+  .b{width:20px;height:20px;border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center}
+  .m{font-size:11px;color:#9aa3ad}
+  .past{opacity:.38}
+  .now{color:#ffb81c;font-weight:600}
+  .legend{display:flex;height:4px;margin:0 16px 8px;border-radius:2px;overflow:hidden}
+  .legend span{flex:1}
+  .tabs{display:flex;gap:2px;margin:0 12px 6px;background:#e6e8ec;border-radius:7px;padding:2px;font-size:12px}
+  .tabs b{flex:1;text-align:center;padding:4px 0;border-radius:5px;font-weight:500;color:#5b6470}
+  .tabs b.on{background:#fff;color:#15181d;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .cal{flex:1;margin:0 12px;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:1fr;font-size:11px;gap:1px}
+  .cal div{padding:3px 4px;color:#3a414b}
+  .cal .h{color:#8a929c;font-size:10px;padding:0 4px}
+  .cal .d{font-variant-numeric:tabular-nums}
+  .cal .o{color:#c2c7ce}
+  .cal .today{background:#15181d;color:#fff;border-radius:6px}
+  .dots{display:flex;gap:2px;margin-top:3px}
+  .dots i{width:5px;height:5px;border-radius:50%}
+  .strip{display:flex;gap:10px;align-items:center;font-size:12px;padding:9px 16px;border-top:1px solid #dfe2e6;margin-top:6px}
+  .strip b{font-weight:600}
+  .chip{padding:1px 6px;border-radius:4px;color:#5b6470}
+  .chip.n{background:#ffb81c;color:#15181d;font-weight:600}
+</style></head><body>
+<div class="w">
+  <div class="top"><span class="date">11월 10일 화요일</span><span class="live"><i></i>실시간</span></div>
+  <section class="board">
+    <h3>다음</h3>
+    <div class="next"><span class="big">12<small>분</small></span><span><div class="nt">2학년 협의회</div><div class="ns">15:30 · 3층 회의실</div></span></div>
+    <div class="row past"><span class="t">08:20</span><span class="b" style="background:#0052a4">학</span><span>아침 조회</span><span class="m">지남</span></div>
+    <div class="row now"><span class="t">14:40</span><span class="b" style="background:#00a84d">행</span><span>진로 특강 (강당)</span><span class="m now">진행 중</span></div>
+    <div class="row"><span class="t">15:30</span><span class="b" style="background:#996cac">회</span><span>2학년 협의회</span><span class="m">12분 후</span></div>
+    <div class="row"><span class="t">16:40</span><span class="b" style="background:#ef7c1c">출</span><span>교육청 연수 출발</span><span class="m">1시간 후</span></div>
+  </section>
+  <div class="legend"><span style="background:#0052a4"></span><span style="background:#996cac"></span><span style="background:#00a84d"></span><span style="background:#ef7c1c"></span><span style="background:#8a929c"></span></div>
+  <div class="tabs"><b class="on">월</b><b>주</b><b>일</b><b>목록</b></div>
+  <div class="cal">
+    <div class="h">일</div><div class="h">월</div><div class="h">화</div><div class="h">수</div><div class="h">목</div><div class="h">금</div><div class="h">토</div>
+    <div class="d">2</div><div class="d">3<div class="dots"><i style="background:#0052a4"></i></div></div><div class="d">4</div><div class="d">5<div class="dots"><i style="background:#996cac"></i></div></div><div class="d">6</div><div class="d">7<div class="dots"><i style="background:#00a84d"></i></div></div><div class="d">8</div>
+    <div class="d">9</div><div class="d today">10<div class="dots"><i style="background:#0052a4"></i><i style="background:#00a84d"></i><i style="background:#996cac"></i></div></div><div class="d">11</div><div class="d">12<div class="dots"><i style="background:#ef7c1c"></i></div></div><div class="d">13<div class="dots"><i style="background:#0052a4"></i><i style="background:#0052a4"></i></div></div><div class="d">14</div><div class="d">15</div>
+    <div class="d">16</div><div class="d">17<div class="dots"><i style="background:#996cac"></i></div></div><div class="d">18</div><div class="d">19<div class="dots"><i style="background:#0052a4"></i></div></div><div class="d">20</div><div class="d">21<div class="dots"><i style="background:#00a84d"></i></div></div><div class="d">22</div>
+    <div class="d">23</div><div class="d">24</div><div class="d">25<div class="dots"><i style="background:#996cac"></i></div></div><div class="d">26</div><div class="d">27</div><div class="d">28<div class="dots"><i style="background:#0052a4"></i></div></div><div class="d">29</div>
+  </div>
+  <div class="strip"><b>지금 6교시</b><span class="chip">2 수학 2-3</span><span class="chip n">6 수학 2-5</span><span class="chip">7 창체</span></div>
+</div>
+</body></html>

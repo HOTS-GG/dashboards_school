@@ -23,8 +23,9 @@ export function TodayStrip({ lessons, bells, onOpen }: { lessons: Lesson[]; bell
   if (now.dayOfWeek > 5) summary = "주말";
   else if (today.length === 0) summary = "오늘 수업 없음";
   else if (bells.length === 0) summary = "오늘 수업";
-  else if (nowLesson) summary = `지금 ${nowLesson.period}교시 ${nowLesson.subject}`;
-  else if (nextLesson) summary = `다음 ${nextLesson.period}교시 ${nextLesson.subject}`;
+  // The chips name the subjects; the summary only says where the day stands.
+  else if (nowLesson) summary = `지금 ${nowLesson.period}교시`;
+  else if (nextLesson) summary = `다음 ${nextLesson.period}교시`;
   else summary = "오늘 수업 끝";
 
   return (

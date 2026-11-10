@@ -114,6 +114,8 @@ export function syncEvents(
           { expand: "owner", fields: "*,expand.owner.id,expand.owner.name" },
         ),
       ]);
+      // An already-open connection doesn't send PB_CONNECT again (e.g. after a remount).
+      void refetch();
     } catch {
       // Server unreachable at startup: keep showing the cache and try again later.
       // (Once connected, the SDK reconnects on its own.)

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>학교 일정 (미리보기)</title>
+    <style>
+      /* Dev-only: view at the widget's window size (e.g. 380 x 520) so sheets sit where they do in the app. */
+      body { background: #50647d !important; }
+    </style>
+    <script>
+      // Stands in for the Tauri backend so the UI can be reviewed in a browser
+      // (`npm run dev`, then open /preview.html). A real session can be dropped in
+      // .preview/session.json (git-ignored). Never part of the built app.
+      (function () {
+        let session = null;
+        const callbacks = new Map();
+        let next = 1;
+        window.__TAURI_INTERNALS__ = {
+          transformCallback(fn) { const id = next++; callbacks.set(id, fn); return id; },
+          unregisterCallback(id) { callbacks.delete(id); },
+          async invoke(cmd, args) {
+            switch (cmd) {
+              case "server_url": return "http://127.0.0.1:8090";
+              case "session_load":
+                try { session = await (await fetch("/.preview/session.json")).text(); } catch {}
+                return session && session.trim().startsWith("{") ? session : null;
+              case "session_save": session = args.value; return null;
+              case "session_clear": session = null; return null;
+              case "is_quiet": return false;
+              case "plugin:notification|is_permission_granted": return false;
+              case "plugin:notification|request_permission": return "denied";
+              default: return null;
+            }
+          },
+          metadata: { currentWindow: { label: "main" }, currentWebview: { label: "main", windowLabel: "main" } },
+        };
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

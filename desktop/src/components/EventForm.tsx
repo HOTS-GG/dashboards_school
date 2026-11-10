@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import { useState, type FormEvent } from "react";
 import { CATEGORIES, TIMEZONE, toPbDate, toZoned } from "../lib/calendar";
 import { createEvent, updateEvent, type EventRecord } from "../lib/events";
@@ -105,7 +106,7 @@ export function EventForm({ event, date, onClose }: Props) {
       <form className="sheet__card form" onSubmit={submit}>
         <header className="sheet__header">
           <h2 className="sheet__title">{event ? "일정 수정" : "새 일정"}</h2>
-          <button type="button" className="button button--icon" onClick={onClose} aria-label="닫기">✕</button>
+          <button type="button" className="button button--icon" onClick={onClose} aria-label="닫기"><Icon name="close" /></button>
         </header>
 
         <label className="field">

@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import { useState, type FormEvent } from "react";
 import { saveBellTimes, type BellTime } from "../lib/timetable";
 
@@ -44,7 +45,7 @@ export function BellEditor({ bells, onClose }: { bells: BellTime[]; onClose: () 
       <form className="sheet__card form" onSubmit={submit}>
         <header className="sheet__header">
           <h2 className="sheet__title">교시 시각 (학교 공통)</h2>
-          <button type="button" className="button button--icon" onClick={onClose} aria-label="닫기">✕</button>
+          <button type="button" className="button button--icon" onClick={onClose} aria-label="닫기"><Icon name="close" /></button>
         </header>
         {bells.length === 0 && <p className="field__hint">일반적인 시각을 미리 채워 두었습니다. 학교에 맞게 고쳐서 저장하세요.</p>}
         {rows.map((r, i) => (

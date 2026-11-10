@@ -31,3 +31,6 @@ server/pb_data/
 
 # Published widget installers and update manifest (scripts/publish-update.ps1)
 server/pb_public/updates/
+
+# Dev-only preview session (desktop/preview.html)
+desktop/.preview/

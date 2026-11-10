@@ -1,3 +1,5 @@
+import { Icon } from "./Icon";
+import { Badge } from "./NextBoard";
 import { useState } from "react";
 import { formatRange } from "../lib/calendar";
 import { canEdit, deleteEvent, skipOccurrence } from "../lib/events";
@@ -38,12 +40,12 @@ export function EventDetail({ occurrence, onEdit, onClose }: Props) {
       <article className="sheet__card" onClick={(e) => e.stopPropagation()}>
         <header className="sheet__header">
           <h2 className="sheet__title">{event.title}</h2>
-          <button className="button button--icon" onClick={onClose} aria-label="닫기">✕</button>
+          <button className="button button--icon" onClick={onClose} aria-label="닫기"><Icon name="close" /></button>
         </header>
         <p className="sheet__meta">{formatRange(occurrence)}</p>
         {repeat && <p className="sheet__meta">반복 · {repeat}</p>}
         {event.location && <p className="sheet__meta">장소 · {event.location}</p>}
-        {event.category && <p className="sheet__meta">분류 · {event.category}</p>}
+        <p className="sheet__meta"><Badge category={event.category} /> {event.category || "기타"}</p>
         {event.expand?.owner?.name && <p className="sheet__meta">등록 · {event.expand.owner.name}</p>}
         {event.description && <p className="sheet__body">{event.description}</p>}
 
