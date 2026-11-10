@@ -1,6 +1,8 @@
 mod auth;
 mod desktop_pin;
+mod health;
 mod settings;
+mod updates;
 
 use settings::Settings;
 use std::sync::Mutex;
@@ -9,6 +11,7 @@ use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Manager, WebviewWindow, WindowEvent};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
+use tauri_plugin_log::{RotationStrategy, Target, TargetKind, TimezoneStrategy};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 use windows::Win32::Foundation::HWND;
 
@@ -136,8 +139,30 @@ fn server_url(settings: tauri::State<Mutex<Settings>>) -> String {
     settings.lock().unwrap().server_url().to_string()
 }
 
+/// Changes the schedule server; the page reloads itself afterwards to reconnect.
+#[tauri::command]
+fn set_server_url(app: AppHandle, url: String) -> Result<(), String> {
+    let url = url.trim().trim_end_matches('/').to_string();
+    if !url.is_empty() && !(url.starts_with("http://") || url.starts_with("https://")) {
+        return Err("주소는 http:// 또는 https:// 로 시작해야 합니다.".into());
+    }
+    let state = app.state::<Mutex<Settings>>();
+    let mut s = state.lock().unwrap();
+    s.server_url = url;
+    s.save(&app);
+    log::info!("server address set to {}", s.server_url());
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Record panics before the (release) abort, so a crash leaves a trace for the watchdog restart.
+    let default_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        log::error!("panic: {info}");
+        default_hook(info);
+    }));
+
     tauri::Builder::default()
         // Must be first: a second launch just brings the running widget forward.
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| show(app)))
@@ -145,8 +170,25 @@ pub fn run() {
         .plugin(tauri_plugin_window_state::Builder::default().with_state_flags(SAVED_STATE).build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(
+            // %LOCALAPPDATA%\kr.hs.gwe.chunchon.dashboard\logs\widget.log, about a week's worth.
+            tauri_plugin_log::Builder::new()
+                .clear_targets()
+                .target(Target::new(TargetKind::LogDir { file_name: Some("widget".into()) }))
+                .target(Target::new(TargetKind::Stdout))
+                .level(log::LevelFilter::Info)
+                .max_file_size(1_000_000)
+                .rotation_strategy(RotationStrategy::KeepSome(7))
+                .timezone_strategy(TimezoneStrategy::UseLocal)
+                .build(),
+        )
+        .manage(health::Heartbeat::default())
         .invoke_handler(tauri::generate_handler![
             server_url,
+            set_server_url,
+            health::heartbeat,
+            health::is_quiet,
             auth::google_login,
             auth::session_load,
             auth::session_save,
@@ -170,7 +212,10 @@ pub fn run() {
             }
             build_tray(&handle, &s)?;
             app.manage(Mutex::new(s));
-            watch_desktop(handle);
+            watch_desktop(handle.clone());
+            health::start(handle.clone());
+            updates::start(handle);
+            log::info!("widget {} started", app.package_info().version);
             Ok(())
         })
         .on_window_event(|window, event| match event {

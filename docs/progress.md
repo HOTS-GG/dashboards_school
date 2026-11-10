@@ -15,10 +15,13 @@
 | M3 일정 보기 | ✅ | `3c8818e` | 위젯 로그인, 달력, 실시간 반영, 오프라인 캐시·자동 재연결 |
 | M4 등록·수정·삭제 | ✅ | `84fb532` | 등록·수정 창, 반복(매일/주/월/년+종료일), 이 날만/전체 삭제, 10분 전 Windows 알림 |
 | M5 시간표 | ✅ | `b8da9a8` | 내 시간표 표 입력, 지난 학기 복사, 교시 시각(관리자), 오늘 수업 줄·현재 교시 강조 |
-| **M6 안정성·배포** | ⏭ 다음 | | 아래 §3 |
-| M7 디자인·배포 | | | 디자인 적용, 학교 서버 PC 배포, 시범 사용 |
+| M6 안정성·배포 준비 | ✅ (일부 M7로) | (M6 커밋) | 감시 프로세스 재시작, 로그, 전체화면 알림 보류, 화면 멈춤 감지·매일 새로 고침, 서버 주소 설정, 서명된 설치 파일·업데이트 게시 |
+| **M7 디자인·배포** | ⏭ 다음 | | 아래 §3 |
 
-M2 중 **재부팅 후 자동 시작**은 설치 파일이 있어야 시험 가능 → M6에서 확인.
+M6에서 남은 확인 (사용자 직접 또는 M7):
+- **자동 업데이트 실제 설치**: 업데이터가 `https` 주소만 허용 → **M7에서 서버를 HTTPS로 올린 뒤** 시험 (2026-11-10 결정: 내부망 http 허용 대신 HTTPS)
+- **재부팅 후 자동 시작**: 설치본 등록은 확인됨(HKCU Run). 실제 재부팅은 미확인
+- **전체화면·발표 중 알림 보류**: 코드만 확인, 실제 발표/게임 중 시험은 미확인
 
 ## 2. 확정된 결정
 
@@ -30,17 +33,29 @@ M2 중 **재부팅 후 자동 시작**은 설치 파일이 있어야 시험 가�
 - **서버**: 학교/사무실 PC 1대에서 PocketBase, 내부망 전용
 - **디자인**: 사용자가 따로 만들어 넣음. 색·글꼴·간격은 `desktop/src/styles/tokens.css`에만 둔다. 현재 화면은 임시 디자인
 
-## 3. 다음 할 일: M6 안정성·배포 준비
+## 3. 다음 할 일: M7 디자인 적용·학교 배포
 
-완료 기준(design.md §7): 강제 종료 후 1분 내 재실행, 전체화면 중 방해 없음, 업데이트 자동 설치.
+완료 기준(design.md §7): 시범 사용자 1주일 사용 중 문제 없음.
 
-- 크래시 재시작: 설치 시 작업 스케줄러 작업(로그온 시 실행 + "실패 시 다시 시작") 또는 작은 감시 프로세스. WebView2 `ProcessFailed` → 화면만 다시 로드
-- 전체화면·발표 감지: `SHQueryUserNotificationState` (QUNS_BUSY / RUNNING_D3D_FULL_SCREEN / PRESENTATION_MODE) → 화면 갱신 멈춤, 알림 보류 후 표시
-- 로그: `tauri-plugin-log`, `%APPDATA%\kr.hs.gwe.chunchon.dashboard\logs`, 7일 보관. 패닉 훅
-- 장시간 실행: 하루 1회(새벽) 화면 조용히 다시 로드
-- 설치 파일: NSIS (`npm run tauri build`), 앱 아이콘 교체, 서버 주소를 설치 시/설정에서 지정
-- 자동 업데이트: `tauri-plugin-updater` + 서명 키, 서버 `pb_public/updates/latest.json`에서 배포
-- M2의 **재부팅 후 자동 시작** 시험도 여기서
+- **디자인**: 사용자가 만든 디자인을 `tokens.css`·컴포넌트에 적용 (impeccable / taste-skill 사용 가능). 앱 아이콘 교체(`npx tauri icon <png>`)
+- **서버 PC 배포**: 고정 IP, PocketBase를 Windows 서비스로(NSSM 또는 작업 스케줄러), 내부망에서 접속되게 `--http 0.0.0.0:8090` + 방화벽 허용, V3 예외
+- **HTTPS**: 업데이터가 https 필수. Caddy 내부 인증서(각 PC에 루트 인증서 배포) 또는 학교 도메인 하위 주소 + 인증서 중 택1 (design.md §8-4). 그 뒤 자동 업데이트 실제 설치 시험
+- **위젯 기본 서버 주소**: `settings.rs`의 `DEFAULT_SERVER_URL`을 학교 서버 주소로 바꿔 빌드 (또는 로그인 화면 "서버 주소"에서 PC마다 입력)
+- 백업: PocketBase 내장 백업 매일 + 다른 저장소로 복사. 서버 PC 옮기는 방법 문서화
+- 서버 관리자 비밀번호를 개발용과 다르게 새로 만들기
+- 시범 사용: 선생님 몇 명에게 설치 → 1주일
+
+### M6 구현 메모
+- **감시 프로세스**(`main.rs`): 설치본은 인자 없이 실행되면 감시자가 되어 `--child`로 위젯을 띄우고, 비정상 종료 시 3초 뒤 재실행(10분에 5번 넘으면 중단). 종료 코드 0(트레이 종료·업데이트·중복 실행 인계)이면 감시자도 종료. 개발 모드(`tauri dev`)에는 감시자 없음
+- 로그: `%LOCALAPPDATA%\kr.hs.gwe.chunchon.dashboard\logs\` — `widget.log`(1MB×7개), `watchdog.log`
+- `health.rs`: 5초마다 `SHQueryUserNotificationState`로 전체화면·발표 감지 → `quiet-mode` 이벤트. 화면 하트비트 3분 끊기면 `reload()`
+- 알림은 "시작 10분 전 ~ 끝날 때까지" 유효 → 발표 중 보류된 알림이 끝난 뒤 "진행 중"으로 표시
+- 화면 오류는 `main.tsx`의 `Recover`가 잡아 30초 뒤 자동 새로 고침. 매일 04시 이후 첫 확인 때 새로 고침
+- **업데이트 게시**: `scripts\publish-update.ps1 -ServerUrl <서버주소>` (먼저 `tauri.conf.json` version 올리기) → `server\pb_public\updates\`에 설치 파일+`latest.json`. 위젯은 시작 1분 뒤·매일 확인
+- **서명 키**: `%USERPROFILE%\.tauri\school-schedule.key` (비밀번호 없음, 저장소 밖). **백업 필수** — 잃으면 설치된 위젯에 업데이트 불가. 공개 키는 `tauri.conf.json`에 있음
+- 설치본은 `%LOCALAPPDATA%\SchoolSchedule\desktop.exe`(현재 사용자 설치, 관리자 권한 불필요). 자동 시작은 HKCU Run `SchoolSchedule`
+- 현재 위젯 버전 0.1.1 (업데이트 시험으로 올림)
+- PowerShell 5.1은 네이티브 프로그램의 stderr를 오류로 취급 → 빌드는 `cmd /c`로 실행
 
 ### M5 구현 메모
 - `lib/timetable.ts`: `TimetableSource` 인터페이스(`load(term) → Lesson[]`) — 지금은 `manualSource`. 자동 연동은 이걸 하나 더 구현해 `syncTimetable(…, source)`로 교체
@@ -95,3 +110,7 @@ M2 중 **재부팅 후 자동 시작**은 설치 파일이 있어야 시험 가�
 | 위젯 로그인 정보 | Windows 자격 증명 관리자 (`kr.hs.gwe.chunchon.dashboard`) |
 | 위젯 오프라인 캐시 | WebView2 localStorage (`events-cache-v1`) |
 | 서버 DB·계정·OAuth 설정 | `server\pb_data` (git 제외) |
+| 위젯 로그 | `%LOCALAPPDATA%\kr.hs.gwe.chunchon.dashboard\logs\` |
+| 설치된 위젯 | `%LOCALAPPDATA%\SchoolSchedule\` |
+| 업데이트 서명 키 | `%USERPROFILE%\.tauri\school-schedule.key` (백업 필수) |
+| 게시된 업데이트 | `server\pb_public\updates\` (git 제외) |

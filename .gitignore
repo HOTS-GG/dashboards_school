@@ -28,3 +28,6 @@ server/pb_data/
 
 # Local editor/agent settings
 .claude/settings.local.json
+
+# Published widget installers and update manifest (scripts/publish-update.ps1)
+server/pb_public/updates/

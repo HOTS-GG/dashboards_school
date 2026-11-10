@@ -1,5 +1,6 @@
 import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
 import { TIMEZONE } from "./calendar";
+import { isQuiet, onQuietChange } from "./health";
 import type { Occurrence } from "./recurrence";
 
 const LEAD_MINUTES = 10;
@@ -32,7 +33,8 @@ export function startNotifier(getOccurrences: () => Occurrence[]): () => void {
   })();
 
   const check = () => {
-    if (!enabled) return;
+    // Full-screen app or presentation: hold reminders until it ends.
+    if (!enabled || isQuiet()) return;
     const now = Temporal.Now.instant();
     const sent = loadSent();
     // Forget entries for occurrences that started more than a day ago.
@@ -40,16 +42,15 @@ export function startNotifier(getOccurrences: () => Occurrence[]): () => void {
 
     for (const o of getOccurrences()) {
       if (o.event.all_day) continue;
-      const startsIn = Temporal.Instant.compare(o.start.toInstant(), now) > 0
-        ? now.until(o.start.toInstant()).total("minutes")
-        : -1;
+      const startsIn = now.until(o.start.toInstant()).total("minutes");
+      const ended = Temporal.Instant.compare(o.end.toInstant(), now) <= 0;
       const id = `${o.key}@${o.start.epochMilliseconds}`;
-      if (startsIn < 0 || startsIn > LEAD_MINUTES || sent[id]) continue;
+      // Due from LEAD_MINUTES before the start until the event ends, so a reminder
+      // held back during a presentation still shows afterwards if it's relevant.
+      if (startsIn > LEAD_MINUTES || ended || sent[id]) continue;
       const time = o.start.withTimeZone(TIMEZONE).toLocaleString("ko-KR", { hour: "numeric", minute: "2-digit" });
-      sendNotification({
-        title: o.event.title,
-        body: [`${time} 시작 (${Math.max(1, Math.round(startsIn))}분 후)`, o.event.location].filter(Boolean).join(" · "),
-      });
+      const when = startsIn > 0 ? `${time} 시작 (${Math.max(1, Math.round(startsIn))}분 후)` : `진행 중 (${time} 시작)`;
+      sendNotification({ title: o.event.title, body: [when, o.event.location].filter(Boolean).join(" · ") });
       sent[id] = o.start.epochMilliseconds;
     }
     saveSent(sent);
@@ -57,5 +58,11 @@ export function startNotifier(getOccurrences: () => Occurrence[]): () => void {
 
   const timer = setInterval(check, CHECK_EVERY_MS);
   setTimeout(check, 3_000);
-  return () => clearInterval(timer);
+  const offQuiet = onQuietChange((q) => {
+    if (!q) check();
+  });
+  return () => {
+    clearInterval(timer);
+    offQuiet();
+  };
 }
