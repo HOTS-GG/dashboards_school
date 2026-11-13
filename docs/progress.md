@@ -1,6 +1,6 @@
 # 진행 상황 · 인수인계
 
-마지막 갱신: 2026-11-10 · 새 컴퓨터/새 세션에서 작업을 이어갈 때 이 문서부터 읽는다.
+마지막 갱신: 2026-11-13 · 새 컴퓨터/새 세션에서 작업을 이어갈 때 이 문서부터 읽는다.
 
 > Claude에게: "docs/progress.md 읽고 다음 단계 이어서 해 줘"
 
@@ -17,7 +17,7 @@
 | M5 시간표 | ✅ | `b8da9a8` | 내 시간표 표 입력, 지난 학기 복사, 교시 시각(관리자), 오늘 수업 줄·현재 교시 강조 |
 | M6 안정성·배포 준비 | ✅ (일부 M7로) | `345c215` | 감시 프로세스 재시작, 로그, 전체화면 알림 보류, 화면 멈춤 감지·매일 새로 고침, 서버 주소 설정, 서명된 설치 파일·업데이트 게시 |
 | M7-a 디자인 | ✅ | `0082494` | "승강장 행선 안내" 방향: 다음 일정 안내판, 노선 색 배지, 테마(자동/밝게/어둡게)·글씨 크기 설정. [DESIGN.md](../DESIGN.md), [PRODUCT.md](../PRODUCT.md) |
-| **M7-b 학교 배포** | ⏭ 다음 | | 아래 §3 |
+| **M7-b 학교 배포** | 🔄 진행 중 | | 스크립트·절차 문서는 됨([deploy.md](deploy.md)), 실제 서버 PC 작업이 남음 — 아래 §3 |
 
 M6에서 남은 확인 (사용자 직접 또는 M7):
 - **자동 업데이트 실제 설치**: 업데이터가 `https` 주소만 허용 → **M7에서 서버를 HTTPS로 올린 뒤** 시험 (2026-11-10 결정: 내부망 http 허용 대신 HTTPS)
@@ -37,14 +37,32 @@ M6에서 남은 확인 (사용자 직접 또는 M7):
 ## 3. 다음 할 일: M7-b 학교 배포
 
 완료 기준(design.md §7): 시범 사용자 1주일 사용 중 문제 없음.
+**절차와 스크립트는 [deploy.md](deploy.md)에 다 있다. 남은 것은 서버 PC에서 실제로 돌려 보는 일.**
 
+준비된 것 (2026-11-13, 코드만 — 실제 서버 PC에서는 아직 안 돌려 봄):
+- `server\install-service.ps1` — 부팅 시 자동 시작(작업 스케줄러, SYSTEM, 죽으면 재실행) + 방화벽 TCP 8090, `-WithHttps`로 Caddy까지, `-Uninstall`로 되돌리기
+- `server\get-caddy.ps1` + `server\Caddyfile` — HTTPS 앞단(체크섬 검증, SSE 버퍼링 끔)
+- `server\backup.ps1` — PocketBase 백업 API + 다른 디스크/NAS로 복사·해시 확인, 매일 23시 작업 등록, 최근 7개만 보관
+- `docs\deploy.md` — 준비·설치·HTTPS·위젯 배포·백업·서버 PC 옮기기·점검 목록·문제 해결
+
+서버 PC에서 할 일 (순서는 deploy.md):
+- **서버 PC 결정·준비**: 상시 켜 둘 PC, 절전 끄기, 고정 IP 또는 DNS 이름, 교무실 PC와 같은 망인지, V3 예외
+- **설치**: clone → `get-pocketbase.ps1` → 관리자 계정을 **개발용과 다른 새 비밀번호로** → `install-service.ps1`(관리자) → Google OAuth 값 입력
+- **HTTPS 방식 결정**(design.md §8-4): 가) 학교 도메인 하위 주소(DNS 관리자 협조, 선생님 PC 손 안 감) ← 먼저 시도 / 나) Caddy 내부 인증서(각 PC에 루트 인증서 `certutil -addstore`). **나)로 가면 Tauri 업데이터가 Windows 저장소의 루트를 신뢰하는지 한 대에서 꼭 먼저 시험**
+- **위젯 기본 서버 주소**: `desktop/src-tauri/src/settings.rs`의 `DEFAULT_SERVER_URL`을 학교 주소로 → version 올리고 `scripts\publish-update.ps1 -ServerUrl <https 주소>`
+- **백업**: `backup.ps1 -SaveCredential` → `-CopyTo`로 한 번 → `-Register`
 - **앱 아이콘**: 아직 Tauri 기본 아이콘. 이름·학교 상징이 정해지면 `npx tauri icon <png>`
-- **서버 PC 배포**: 고정 IP, PocketBase를 Windows 서비스로(NSSM 또는 작업 스케줄러), 내부망에서 접속되게 `--http 0.0.0.0:8090` + 방화벽 허용, V3 예외
-- **HTTPS**: 업데이터가 https 필수. Caddy 내부 인증서(각 PC에 루트 인증서 배포) 또는 학교 도메인 하위 주소 + 인증서 중 택1 (design.md §8-4). 그 뒤 자동 업데이트 실제 설치 시험
-- **위젯 기본 서버 주소**: `settings.rs`의 `DEFAULT_SERVER_URL`을 학교 서버 주소로 바꿔 빌드 (또는 로그인 화면 "서버 주소"에서 PC마다 입력)
-- 백업: PocketBase 내장 백업 매일 + 다른 저장소로 복사. 서버 PC 옮기는 방법 문서화
-- 서버 관리자 비밀번호를 개발용과 다르게 새로 만들기
-- 시범 사용: 선생님 몇 명에게 설치 → 1주일
+- **시범 사용**: 선생님 2~3명 설치 → 1주일 (deploy.md §7의 볼 것)
+
+### M7-b 배포 스크립트 메모
+- **서비스는 NSSM 대신 작업 스케줄러**로 함 — Windows 기본 기능만 쓰고 설치할 것이 없다. 부팅 트리거 + SYSTEM + `ExecutionTimeLimit = PT0S`(시간 제한 없음) + 실패 시 1분 뒤 재시작(10번)
+- `install-service.ps1`은 pb_data/pb_hooks 등 경로를 `$PSScriptRoot` 기준으로 넣는다 → **저장소 폴더를 서버 PC 로컬 디스크에** 두어야 한다(네트워크 공유 금지)
+- `backup.ps1`의 비밀번호는 DPAPI(`Export-Clixml`)로 `server\pb_data\backup-credential.xml`(git 제외)에 저장 → **저장한 Windows 계정만** 읽는다. 그래서 백업 작업만 그 계정(S4U)으로 돌고 서버 작업은 SYSTEM
+- 백업은 `POST /api/backups`(superuser 토큰)로 서버가 직접 만들게 한다 — 실행 중 `pb_data`를 그냥 복사하면 SQLite WAL 때문에 깨질 수 있다. 복원은 관리 화면 Backups → Restore
+- Caddy 호스트 이름은 머신 환경 변수 `SCHOOL_SERVER_HOST`로 넘긴다(`get-caddy.ps1`이 설정) → SYSTEM 작업에서도 보인다. Caddy는 2.10.0 핀, 릴리스 체크섬 검증
+- `reverse_proxy`에 `flush_interval -1` — PocketBase 실시간(SSE)이 버퍼링되면 위젯 반영이 늦는다
+- 스크립트 주석·출력은 기존 스크립트대로 영어(PowerShell 5.1이 BOM 없는 UTF-8 .ps1의 한글을 깨뜨린다). 문서는 한국어
+- 검증 수준: 세 스크립트 모두 파서 통과, 작업 스케줄러 API(`New-ScheduledTask*` 설정·SYSTEM/S4U 주체)와 Caddy 2.10.0 내려받기 주소는 실제로 확인. **등록·백업·HTTPS 실행 자체는 서버 PC에서 해 봐야 한다**
 
 ### M7-a 디자인 구현 메모
 - 진행: impeccable `init`(PRODUCT.md) → 방향 고르기 페이지(4안 중 "승강장 행선 안내") → 코드로 구현 → 마무리 검토·DESIGN.md. 방향 계약은 `.impeccable/surfaces/desktop-src-app-tsx.md`
@@ -122,3 +140,6 @@ M6에서 남은 확인 (사용자 직접 또는 M7):
 | 설치된 위젯 | `%LOCALAPPDATA%\SchoolSchedule\` |
 | 업데이트 서명 키 | `%USERPROFILE%\.tauri\school-schedule.key` (백업 필수) |
 | 게시된 업데이트 | `server\pb_public\updates\` (git 제외) |
+| 서버 백업 (서버 PC) | `server\pb_data\backups\` + `backup.ps1 -CopyTo`로 지정한 곳 |
+| 백업용 관리자 비밀번호 | `server\pb_data\backup-credential.xml` (DPAPI, git 제외) |
+| 서버·HTTPS 자동 시작 작업 | 작업 스케줄러 `SchoolSchedule-Server` / `-Https` / `-Backup` |

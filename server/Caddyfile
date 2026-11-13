@@ -1,0 +1,29 @@
+# HTTPS front for the school schedule server (PocketBase on 127.0.0.1:8090).
+# The host name comes from the machine environment variable SCHOOL_SERVER_HOST,
+# set by server\get-caddy.ps1 -Hostname <name>.
+#
+# Start it with: server\install-service.ps1 -WithHttps
+{
+	# No ACME account e-mail: an internal-only server uses Caddy's own local CA.
+	# With a school DNS name reachable from the internet, add your address here
+	# and Caddy will get a public certificate instead.
+	admin off
+}
+
+{$SCHOOL_SERVER_HOST:school-schedule.local} {
+	encode zstd gzip
+
+	reverse_proxy 127.0.0.1:8090 {
+		# PocketBase pushes live schedule changes as server-sent events:
+		# never buffer them, or the widget would update late.
+		flush_interval -1
+		header_up X-Forwarded-Host {host}
+	}
+
+	log {
+		output file bin/caddy.log {
+			roll_size 5MiB
+			roll_keep 5
+		}
+	}
+}

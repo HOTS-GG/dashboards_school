@@ -3,6 +3,7 @@
 학교 선생님들이 일정을 등록하면 모든 선생님 PC 바탕화면 위젯에 바로 보이는 일정 공유 프로그램.
 
 - **진행 상황·인수인계: [docs/progress.md](docs/progress.md)** ← 이어서 작업할 때 여기부터
+- 학교 배포 절차: [docs/deploy.md](docs/deploy.md)
 - 설계: [docs/design.md](docs/design.md)
 - 사전 조사: [docs/research.md](docs/research.md)
 
